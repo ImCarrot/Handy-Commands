@@ -1,5 +1,25 @@
 # CDK Getting Started
 
+## Processflow
+
+```
+   +-------------------------+      +------------------------------+      +--------------------------+      +------------------------+
+   |         Init            |      |         Bootstrap            |      |         Synth            |      |         Deploy         |
+   | Project is created using| ---> | Creates needed AWS resources | ---> | Generates Cloudformation | ---> | Templates are launched |
+   | command line tool       |      | for CDK environment.         |      | templates from code      |      | by Cloudformation      |
+   +-------------------------+      +------------------------------+      +--------------------------+      +------------------------+
+                                                                                       /|\                              |
+                                                                                        |                               |
+                                                                                        |                               |
+                                                                                        |                              \|/
+                                                                          +--------------------------+      +-------------------------+
+                                                                          |          Diff            |      |         Update          |
+                                                                          | Updates against deployed | <--- | CDK project is updated  |
+                                                                          | stack are identified     |      | with new infrastructure |
+                                                                          +--------------------------+      +-------------------------+
+```
+
+
 ## Install AWS-CDK via npm (make sure you have node installed)
 ```
 npm install -g aws-cdk
