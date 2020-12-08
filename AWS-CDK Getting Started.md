@@ -2,7 +2,7 @@
 
 ## Structure of CDK Project
 
-![Source: Pluralsight](https://user-images.githubusercontent.com/16665638/101532241-450b4980-39ba-11eb-99b8-fa0971d95596.png)
+![image](https://user-images.githubusercontent.com/16665638/101538466-265d8080-39c3-11eb-8325-b63d9013a0a6.png)
 
 ### App: 
 - is the root of the context tree for a `CDK` project.
@@ -23,6 +23,18 @@
 - can be programmatically customized.
 - enable reuse within organizations.
 
+#### L1 Construct (a.k.a CloudFormation Object)
+- in the `AWS CDK Docs` you'll find them listed as `CFN-Resources`.
+- a direct map to what's present in `CloudFormation`.
+- e.g. properties of a `API gateway` that you would define in `CloudFormation`.
+
+#### L2 Construct
+- in the `AWS CDK Docs` you'll find them listed as `CDK-Constructs`.
+- written specifically for `CDK`.
+- has a lot of default settings to enable you to run a particular infrastructure with default settings.
+
+> Not all services have L2 Constructs. According to `AWS CDK Docs`, you'll find a lot of services have the `L2 Construct` marked as `Experimental` (meaning you can experience breaking changes with new versions) while you may not find `L2 Constructs` at all.
+
 ### Resource
 - an infrastructure created via the CDK
 - has an `identifier`
@@ -37,19 +49,19 @@
    | using command line | ---> | resources for CDK  | ---> | templates from code      | ---> | by Cloudformation      |
    | command line tool  |      | environment.       |      |                          |      |                        |
    +--------------------+      +--------------------+      +--------------------------+      +------------------------+
-                                                                        /|\                              |
-                                                                         |                               |
-                                                                         |                               |
-                                                                         |                              \|/
-                                                            +--------------------------+      +-------------------------+
-                                                            |          Diff            |      |         Update          |
-                                                            | Updates against deployed | <--- | CDK project is updated  |
-                                                            | stack are identified     |      | with new infrastructure |
-                                                            +--------------------------+      +-------------------------+
+                                                                       /|\                              |
+                                                                        |                               |
+                                                                        |                               |
+                                                                        |                              \|/
+                                                          +--------------------------+      +-------------------------+
+                                                          |          Diff            |      |         Update          |
+                                                          | Updates against deployed | <--- | CDK project is updated  |
+                                                          | stack are identified     |      | with new infrastructure |
+                                                          +--------------------------+      +-------------------------+
 ```
 
 ## Some useful advice
-- You should always pin your `CDK versions` to exactly one version and not use the caret `^`. This is because all dependencies for `@aws` must be on the same verison. If either of the version conflicts, you might just end up with an non intuitive error message. 
+- You should always pin your `CDK versions` to exactly one version and not use the caret `^`. This is because all dependencies for `@aws` must be on the same verison. If either of the version conflicts, you might just end up with a non intuitive error message. 
 
 ## Prerequisites
 Even if you aren't using Typescript for your `CDK`, you do need `Node`, `npm` and `aws-cli` installed on your system `CDK` to work. You can use any other alternatives of `npm` if you're already familiar with it. It's also recommended that you use `aws-cli v2`.
@@ -132,7 +144,9 @@ mkdir templates
 cdk synth --output=./templates
 ```
 
-### View Created Apps
+> `--output` is optional if you don't want to output to a separate directory. Not passing this flag would print out the generated template on the `console`.
+
+### View Created Stacks in the CDK application
 ```
 cdk list
 ```
@@ -141,10 +155,32 @@ cdk list
 ```
 cdk deploy <NAME_OF_THE_STACK_FROM_ABOVE_COMMAND> --profile <NAME_OF_THE_PROFILE> 
 ```
+
+> `--profile` is optional in case you want to run via the default credentials that you used for `aws configure`.
+
+you can also deploy multiple stacks using their names:
+```
+cdk deploy <NAME_OF_THE_STACK_1> <NAME_OF_THE_STACK_2> 
+```
+
+or you can just use `*` for all
+```
+cdk deploy *
+```
+
+### To troubleshoot/check your stack
+If something is not working the way it should or its your fist `CDK` setup and you want to check things in your `stack`
+
+```
+cdk docktor
+```
+
 ### Check your export on the terminal
 ```
 aws --profile <NAME_OF_THE_PROFILE> --region <NAME_OF_REGION> cloudformation list-exports
 ```
+
+> `--profile` and `--region` are optional in case you want to run via the defaults that you used for `aws configure`.
 
 ### Checking for changes
 once changes are done, we need to check all the changes before we can deploy. For that run the below command:
