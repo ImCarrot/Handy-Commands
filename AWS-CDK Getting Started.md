@@ -192,3 +192,8 @@ cdk diff
 ```
 cdk destroy <NAME_OF_STACK>
 ```
+
+## Read More
+- [AWS CDK Workshop](https://cdkworkshop.com/)
+- [CDK Hello World](https://docs.aws.amazon.com/cdk/latest/guide/hello_world.html)
+- [CDK Samples](https://github.com/aws-samples/aws-cdk-examples)
