@@ -131,6 +131,12 @@ the base template for the above command is:
 cdk init TEMPLATE --language LANGUAGE
 ```
 
+
+If you don't want to create a `stack` but are trying to create a sharable `Construct Library` instead, you can fire up the below command to skip out all the extra stuff
+```
+cdk init --language=typescript lib
+```
+
 ### Bootstrap the AWS Account
 ```
 cdk bootstrap
@@ -211,9 +217,42 @@ cdk diff
 cdk destroy <NAME_OF_STACK>
 ```
 
+## Testing
+- Most popular library is `jest` but only usable with `Typescript` but that doesn't mean it can't test `constructs` written in python.
+
+### Resolving Library Confusion
+
+The online `CDK` docs & workshops use the deeper `jest` library and use `expect` while the `cdk init` would generate test files from the `@aws-cdk/assert` library and in that, `expect` is aliased as `expectCDK`. Both can be used side by side though.
+
+```
+// from @aws-cdk/assert/jest
+expect(stack).toHaveResource('AWS::S3::Bucket');
+
+// from @aws-cdk/assert
+expectCDK(stack).to(haveResource('AWS::S3::Bucket'));
+```
+
+The `jest` library creates these functions as `extenders` to the base `assert` library.
+
+### Snapshot Tests
+- Tests the `synthesized` cloudformation assembly against a previous version. 
+- Useful for refactoring, when you want the final outcome to be the same for before and after code.
+- If your resource names are dynamic *(for instance your `S3` bucket is named dynamically)*, your `cloudformation` json would be different everytime we run a snapshot test. Hence the snapshot test would fail everytime.
+
+### Fine-grained assertions
+- uses `assertions` through `expect` statements.
+- used to test for expected properties or characteristics of resources using the `.toHaveResource()` method of the `expect` class.
+- verifies one part of the `construct's` behavior
+- to build assetions, you'll need reference to `CloudFormation` properties. To lookup the property nomenclature refer to [AWS resource and property types reference](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html).
+
+### Validation tests
+- validates a construct does something that we expect it to do in different situations. e.g. property of a resource throws an error when a condition is not met.
+- generally check using the `toThrowError()` method
+
 ## References and Read More
 - [AWS CDK Workshop](https://cdkworkshop.com/)
 - [CDK Hello World](https://docs.aws.amazon.com/cdk/latest/guide/hello_world.html)
 - [CDK Samples](https://github.com/aws-samples/aws-cdk-examples)
 - [AWS Solutions Constructs Patterns](https://aws.amazon.com/solutions/constructs/patterns)
 - [AWS CDK Patterns](https://cdkpatterns.com/)
+- [AWS Docs on Testing](https://docs.aws.amazon.com/cdk/latest/guide/testing.html)
