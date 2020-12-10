@@ -1,2 +1,2 @@
-# handy-commands
-The repository that holds getting started guides and commands to work or manage different tools and technologies. 
+# Flash Cards
+The gloal of this repository is to saturate rather summarize all the resources online into a handy document for later references. This repository would serve as one-stop for the topics and be a great resource to trace back learnings or ever refresh learnings. Also there would be a references section at the end of each document where we can go to find more information or see the source of the information.
