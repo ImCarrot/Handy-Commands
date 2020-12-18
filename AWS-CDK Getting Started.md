@@ -51,6 +51,30 @@
 - has an `identifier`
 - maps to a `Resource` in `CloudFormation`.
 
+## Stack Patterns
+There are a lot of patterns just to start with a few:
+
+### Business Driven
+- Departmental.
+- Segregation Required.
+- Resources highly duplicated.
+
+### Functional
+- Logical Functions
+- Reusable process
+- Less flecibility
+
+### Hierarchial
+- Top-Down approach
+- Lower levels inherit from higher levels
+
+### Controlled Chaos
+- Avoid organization
+- High degree of flexibility
+
+### Misc
+- other patterns to handle specific needs for example Distributed Monoliths.
+
 ## CDK Workflow
 
 ```
@@ -73,6 +97,12 @@
 
 ## Some useful advice
 - You should always pin your `CDK versions` to exactly one version and not use the caret `^`. This is because all dependencies for `@aws` must be on the same verison. If either of the version conflicts, you might just end up with a non intuitive error message. 
+
+# Common patterns for writing CDK code
+There are two most common patterns.
+
+## Dividing `infra` using `stacks`
+
 - Divide your `App` into `stacks`. For example, if your application contains `S3`, `API Gateway`, `Lambda`, `DynamoDB` and `AmazonRDS`, then you would have 4 stacks, 
    - data: that'll contain `dynamodb` and `AmazonRDS`
    - storage: that'll contain `S3 Buckets` and `S3 Deployments`
@@ -80,6 +110,93 @@
    - api: that'll contain your `API Gateway`
    - security: would have it's own stack containing `roles` and `policies`.
 - To code multiple stacks, make a folder called `stacks` in your `lib` directory and then make sub folders for each stack. For example, for your `database-stack.ts` stack file, the path your be: `<PROJECT_BASE_PATH>/lib/stacks/database/database-stack.ts`
+
+### Resolving Stack Dependencies
+
+#### Passing properties as parameters
+- A simple use of the constructor of the `Stack`.
+- Passing a public class member from another `Stack`.
+
+```
+constructor(scope: cdk.Construct, id: string, usefulParameter: SomeType, props, props) {}
+```
+
+and would be called as:
+```
+const someStack = SomeStackType(app, 'SomeStack, props');
+const depStack = new MyCustomDependantStack(app, 'TestDepStack', someStack.someParameter, props);
+```
+
+#### Passing properties with stack props
+- We pass a properties object instead and pass the dependancy value in that properties object.
+```
+export interface DepStackProps extends cdk.StackProps {
+   vpc: ec2.IVpc
+}
+```
+and would be called as:
+```
+const props = {env: 'dev', projectName: 'Sample'}
+const vpcStack = new VPCStackType(app, 'TestVPC', props);
+const DepStack = new DepStackType(app, 'DepStackTest', {... props, vpc: vpcStack.vpc});
+```
+
+#### Passing stacks as paramters
+- we just pass the entire stack.
+- it can lead to loaded object being passed but generally it's not that huge of an object.
+
+```
+constructor(scope: cdk.Construct, id: string, vpcstack: VPCStackType) {}
+```
+
+and would be called as:
+```
+const vpcStack = new VPCStackType(app, 'TestVPC', props);
+const DepStack = new DepStackType(app, 'DepStackTest', vpcStack);
+```
+
+#### Context Variables
+- Generally not used for intra-stack communication but is possible to be used.
+- Context can be set using `construct.node.setContext()` and can be retreived by using `construct.node.tryGetContext()`.
+
+```
+this.node.setContext('vpcId', '98765');
+const vpcId = this.node.tryGetContext('vpcId');
+```
+
+#### Environment Variables
+- More universal across boundaries
+- Comparitively simpler toi set and retrieve.
+```
+process.env.MY_VPC = 'MyVPC'; // sets the data to the env
+
+vpcName: string = process.env.MY_VPC; // fetches the name of the VPC from the env
+```
+
+#### SSM Parameters
+- SSM stands for `Systems Manager`
+- Highly Versitile.
+- Can be secured.
+- Can be read at `synthesis` and `deploy` time.
+```
+// to set the value in SSM.
+new ss..StringParameter(stack, 'TestParam', {message, 'Hey There!'});
+
+// to read values from SSM
+const message = ssm.StringParameter.fromStringParameterAttributes(this, 'TestValue', {
+   parameterName: 'TestParam'
+}).stringValue;
+```
+
+## Using Constructs
+- Divide up the infrastructure into small constructs that can be built leveraging `abstractions` and `props`
+- No need for `Intra-Stack` communications since all dependant resources are clubbed into a single construct.
+- The best way to provide infrastructure code reuse.
+- Code can be made into Libs and then shared across.
+- AWS CDK is also leveraging `Constructs`.
+- Dependencies are passed in using `dependency injection` via `props`. For example, a construct contains `ec2` and `vpc`. The settings for `maxAZs` for a `vpc` would be passed as `construct props`.
+
+# Seting up CDK and getting started
 
 ## Prerequisites
 Even if you aren't using Typescript for your `CDK`, you do need `Node`, `npm` and `aws-cli` installed on your system `CDK` to work. You can use any other alternatives of `npm` if you're already familiar with it. It's also recommended that you use `aws-cli v2`.
